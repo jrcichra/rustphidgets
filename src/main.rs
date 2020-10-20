@@ -1,25 +1,26 @@
 extern crate libc;
+mod common;
 mod phidget22;
 
-mod common;
+use std::{thread, time};
 
 fn setup_network() {
     unsafe {
-        let (_garb, justin) = common::str_to_char_arr("Justin");
-        let (_garb2, ip) = common::str_to_char_arr("10.0.0.176");
-        let (_garb3, blank) = common::str_to_char_arr("");
-        let rc = phidget22::PhidgetNet_addServer(justin, ip, 5661, blank, 0);
+        let (_hostname, hostname) = common::str_to_char_arr("Justin");
+        let (_ip, ip) = common::str_to_char_arr("10.0.0.176");
+        let (_blank, blank) = common::str_to_char_arr("");
+        let rc = phidget22::PhidgetNet_addServer(hostname, ip, 5661, blank, 0);
         if rc != phidget22::PhidgetReturnCode_EPHIDGET_OK {
             println!("Something went wrong in networking: {}", rc);
         }
     }
 }
 
-fn get_temperature() {
+fn setup_temperature() -> phidget22::PhidgetTemperatureSensorHandle {
     unsafe {
         //debug
-        let (_garb4, output) = common::str_to_char_arr("phidgetlog.log");
-        phidget22::PhidgetLog_enable(phidget22::Phidget_LogLevel_PHIDGET_LOG_VERBOSE, output);
+        let (_debugpath, debugpath) = common::str_to_char_arr("phidgetlog.log");
+        phidget22::PhidgetLog_enable(phidget22::Phidget_LogLevel_PHIDGET_LOG_VERBOSE, debugpath);
         #[allow(deprecated)]
         let mut temphandle: phidget22::PhidgetTemperatureSensorHandle = std::mem::uninitialized();
         phidget22::PhidgetTemperatureSensor_create(&mut temphandle);
@@ -33,17 +34,25 @@ fn get_temperature() {
                 "Something went wrong when attaching to the temperature sensor: {}",
                 rc
             );
-        } else {
-            let mut temp = 0.0_f64;
-            let temp_ptr: *mut f64 = &mut temp;
-            phidget22::PhidgetTemperatureSensor_getTemperature(temphandle, temp_ptr);
-            println!("Got a temperature of {}.", temp);
         }
+        return temphandle;
     }
+}
+
+fn get_temperature(temphandle: phidget22::PhidgetTemperatureSensorHandle) {
+    let mut temp = 0.0_f64;
+    let temp_ptr: *mut f64 = &mut temp;
+    unsafe {
+        phidget22::PhidgetTemperatureSensor_getTemperature(temphandle, temp_ptr);
+    }
+    println!("Got a temperature of {}.", temp);
 }
 
 fn main() {
     setup_network();
-    get_temperature();
-    println!("hello phidgets!");
+    let handle = setup_temperature();
+    loop {
+        get_temperature(handle);
+        thread::sleep(time::Duration::from_secs(1));
+    }
 }
