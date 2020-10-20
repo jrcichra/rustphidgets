@@ -45,7 +45,7 @@ fn get_temperature(temphandle: phidget22::PhidgetTemperatureSensorHandle) {
     unsafe {
         phidget22::PhidgetTemperatureSensor_getTemperature(temphandle, temp_ptr);
     }
-    println!("Got a temperature of {}.", temp);
+    println!("Got a temperature of {} F.", temp * 9.0 / 5.0 + 32.0);
 }
 
 fn main() {
