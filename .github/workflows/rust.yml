@@ -22,7 +22,7 @@ jobs:
       - uses: actions/upload-artifact@v2
         with:
           name: rustphidgets
-          path: target/release
+          path: target/release/rustphidgets
 
 env:
   CARGO_TERM_COLOR: always
