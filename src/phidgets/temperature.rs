@@ -1,9 +1,11 @@
+use super::super::phidgets;
 use super::phidget22;
 use core::mem::MaybeUninit;
 
 #[derive(Copy, Clone)]
 pub struct PhidgetTemperature {
     handle: phidget22::PhidgetTemperatureSensorHandle,
+    pub phidget: phidgets::Phidget,
 }
 
 pub trait PhidgetTemperatureTraits {
@@ -18,7 +20,12 @@ impl PhidgetTemperatureTraits for PhidgetTemperature {
             temphandle = MaybeUninit::uninit().assume_init();
             phidget22::PhidgetTemperatureSensor_create(&mut temphandle);
         }
-        return PhidgetTemperature { handle: temphandle };
+        return PhidgetTemperature {
+            handle: temphandle,
+            phidget: phidgets::Phidget {
+                handle: temphandle as phidget22::PhidgetHandle,
+            },
+        };
     }
     fn get_temperature(self) -> f64 {
         let mut temp = 0.0_f64;

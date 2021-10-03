@@ -3,6 +3,7 @@ pub mod network;
 pub mod phidget22;
 pub mod temperature;
 
+#[derive(Copy, Clone)]
 pub struct Phidget {
     handle: phidget22::PhidgetHandle,
 }
