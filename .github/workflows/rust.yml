@@ -17,10 +17,12 @@ jobs:
           cd libphidget22*
           ./configure --prefix=/usr && make -j$(nproc) && sudo make install
           cd ..
+      - name: Build Release
+        run: cargo build --release --verbose
       - uses: actions/upload-artifact@v2
         with:
           name: rustphidgets
-          path: .
+          path: target/release
 
 env:
   CARGO_TERM_COLOR: always
