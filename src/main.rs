@@ -2,8 +2,10 @@ extern crate libc;
 mod phidgets;
 use phidgets::network::PhidgetNetwork;
 use phidgets::network::PhidgetNetworkTraits;
+use phidgets::phidget22;
 use phidgets::temperature::PhidgetTemperature;
 use phidgets::temperature::PhidgetTemperatureTraits;
+use phidgets::Phidget;
 use phidgets::PhidgetTraits;
 use std::{thread, time};
 
@@ -15,8 +17,11 @@ fn main() {
     let phidget = PhidgetTemperature::new();
     println!("Waiting for attachment...");
     let rc = phidget.phidget.open_wait_for_attachment(2000);
-    if rc != 0 {
-        println!("Error opening phidget");
+    if rc != phidget22::PhidgetReturnCode_EPHIDGET_OK {
+        println!(
+            "Error opening phidget: {}",
+            Phidget::get_return_code_string(rc)
+        );
         return;
     }
     println!("Attached!");
