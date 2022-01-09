@@ -5,7 +5,7 @@ use phidgets::network::PhidgetNetworkTraits;
 use phidgets::phidget22;
 use phidgets::temperature::PhidgetTemperature;
 use phidgets::temperature::PhidgetTemperatureTraits;
-use phidgets::lcd::{setup_lcd, flush, write_text, delete, close};
+use phidgets::lcd::{LCDPhidget};
 use phidgets::Phidget;
 use phidgets::PhidgetTraits;
 use std::{thread, time};
@@ -19,7 +19,7 @@ fn main() {
     // temp();
 
     //make a phidget LCD object
-    lcd();
+    lcd().unwrap();
 }
 
 
@@ -45,13 +45,20 @@ fn temp() {
     }
 }
 
-fn lcd() {
-    let mut phidget = setup_lcd(1, 597101, true);
+fn lcd() -> Result<(), u32> {
+    // let mut phidget = setup_lcd(1, 597101, true);
+    let mut phidget = LCDPhidget::setup(1, true, 1000)?;
     println!("It was successful!");
 
-    dbg!(write_text(phidget, phidget22::PhidgetLCD_Font_FONT_6x10, 20, 20, "bob"));
-    dbg!(flush(phidget));
+    phidget.set_backlight(0.05);
+    phidget.write_text(phidget22::PhidgetLCD_Font_FONT_6x12, 20, 20, "BOB");
+    phidget.flush();
 
-    close(phidget);
-    delete(&mut phidget);
+    let mut x = String::new();
+    std::io::stdin().read_line(&mut x).unwrap();
+
+    phidget.close();
+    phidget.delete();
+
+    Ok(())
 }
