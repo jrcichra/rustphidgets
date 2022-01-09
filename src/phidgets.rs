@@ -2,6 +2,7 @@ pub mod common;
 pub mod network;
 pub mod phidget22;
 pub mod temperature;
+pub mod lcd;
 
 #[derive(Copy, Clone)]
 pub struct Phidget {
