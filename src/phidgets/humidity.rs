@@ -1,33 +1,46 @@
 use super::phidget22;
+use super::phidget22::*;
+use crate::phidgets::PhidgetTraits;
 
-pub fn setup_humidity() -> phidget22::PhidgetHumiditySensorHandle {
-    unsafe {
-        //debug
-        // let (_debugpath, debugpath) = common::str_to_char_arr("phidgetlog.log");
-        // phidget22::PhidgetLog_enable(phidget22::Phidget_LogLevel_PHIDGET_LOG_VERBOSE, debugpath);
-        #[allow(deprecated)]
-        let mut temphandle: phidget22::PhidgetTemperatureSensorHandle = std::mem::uninitialized();
-        phidget22::PhidgetTemperatureSensor_create(&mut temphandle);
-        phidget22::Phidget_setIsRemote(temphandle as phidget22::PhidgetHandle, 1);
-        phidget22::Phidget_setDeviceSerialNumber(temphandle as phidget22::PhidgetHandle, 597101);
-        phidget22::Phidget_setHubPort(temphandle as phidget22::PhidgetHandle, 0);
-        let rc =
-            phidget22::Phidget_openWaitForAttachment(temphandle as phidget22::PhidgetHandle, 5000);
-        if rc != phidget22::PhidgetReturnCode_EPHIDGET_OK {
-            println!(
-                "Something went wrong when attaching to the temperature sensor: {}",
-                rc
-            );
-        }
-        return temphandle;
-    }
+use core::mem::MaybeUninit;
+pub struct HumidityPhidget {
+    handle: phidget22::PhidgetHumiditySensorHandle,
 }
 
-pub fn get_temperature(temphandle: phidget22::PhidgetTemperatureSensorHandle) -> f64 {
-    let mut temp = 0.0_f64;
-    let temp_ptr: *mut f64 = &mut temp;
-    unsafe {
-        phidget22::PhidgetTemperatureSensor_getTemperature(temphandle, temp_ptr);
+impl HumidityPhidget {
+    pub fn setup(
+        hub_port: i32,
+        remote: bool,
+        max_wait_millis: u32,
+    ) -> Result<HumidityPhidget, u32> {
+        let phidget = HumidityPhidget::create();
+        let phidget_handle = phidget.handle as PhidgetHandle;
+        phidget_handle.set_hub_port(hub_port)?;
+        phidget_handle.set_is_remote(remote)?;
+        phidget_handle.open_wait_for_attachment(max_wait_millis)?;
+        Ok(phidget)
     }
-    return temp;
+
+    pub fn create() -> HumidityPhidget {
+        unsafe {
+            let mut humidity_handle = MaybeUninit::uninit().assume_init();
+            PhidgetHumiditySensor_create(&mut humidity_handle);
+            HumidityPhidget {
+                handle: humidity_handle,
+            }
+        }
+    }
+
+    pub fn get_humidity(&self) -> Result<f64, u32> {
+        let rc;
+        let mut humidity;
+        unsafe {
+            humidity = MaybeUninit::uninit().assume_init();
+            rc = phidget22::PhidgetHumiditySensor_getHumidity(self.handle, &mut humidity);
+        }
+        match rc {
+            0 => Ok(humidity),
+            _ => Err(rc),
+        }
+    }
 }
