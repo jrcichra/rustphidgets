@@ -11,7 +11,3 @@ edition = "2021"
 [dependencies]
 clap = { version = "3.0.6", features = ["derive"] }
 libc = "0.2"
-
-#[lib]
-#name = "rustphidgets"
-#path = "src/main.rs"
