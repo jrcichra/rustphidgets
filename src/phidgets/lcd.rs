@@ -19,10 +19,9 @@ impl LCDPhidget {
     }
 
     pub fn close(&self) -> Result<(), u32> {
-        let rc;
-        unsafe {
-            rc = Phidget_close(self.handle as PhidgetHandle);
-        }
+        let rc = unsafe {
+            Phidget_close(self.handle as PhidgetHandle)
+        };
         match rc {
             0 => Ok(()),
             _ => Err(rc),
@@ -30,12 +29,11 @@ impl LCDPhidget {
     }
 
     pub fn create() -> Result<LCDPhidget, u32> {
-        let rc;
         let mut lcd_handle;
-        unsafe {
+        let rc = unsafe {
             lcd_handle = MaybeUninit::uninit().assume_init();
-            rc = PhidgetLCD_create(&mut lcd_handle);
-        }
+            PhidgetLCD_create(&mut lcd_handle)
+        };
         match rc {
             0 => Ok(LCDPhidget { handle: lcd_handle }),
             _ => Err(rc),
@@ -43,10 +41,9 @@ impl LCDPhidget {
     }
 
     pub fn delete(&mut self) -> Result<(), u32> {
-        let rc;
-        unsafe {
-            rc = PhidgetLCD_delete(&mut self.handle);
-        }
+        let rc = unsafe {
+            PhidgetLCD_delete(&mut self.handle)
+        };
         match rc {
             0 => Ok(()),
             _ => Err(rc),
@@ -54,12 +51,11 @@ impl LCDPhidget {
     }
 
     pub fn get_backlight(&self) -> Result<f64, u32> {
-        let rc;
         let mut backlight;
-        unsafe {
+        let rc = unsafe {
             backlight = MaybeUninit::uninit().assume_init();
-            rc = PhidgetLCD_getBacklight(self.handle, &mut backlight);
-        }
+            PhidgetLCD_getBacklight(self.handle, &mut backlight)
+        };
         match rc {
             0 => Ok(backlight),
             _ => Err(rc),
@@ -67,10 +63,9 @@ impl LCDPhidget {
     }
 
     pub fn set_backlight(&self, backlight: f64) -> Result<(), u32> {
-        let rc;
-        unsafe {
-            rc = PhidgetLCD_setBacklight(self.handle, backlight);
-        }
+        let rc = unsafe {
+            PhidgetLCD_setBacklight(self.handle, backlight)
+        };
         match rc {
             0 => Ok(()),
             _ => Err(rc),
@@ -78,10 +73,9 @@ impl LCDPhidget {
     }
 
     pub fn flush(&self) -> Result<(), u32> {
-        let rc;
-        unsafe {
-            rc = PhidgetLCD_flush(self.handle);
-        }
+        let rc = unsafe {
+            PhidgetLCD_flush(self.handle)
+        };
         match rc {
             0 => Ok(()),
             _ => Err(rc),
@@ -89,10 +83,9 @@ impl LCDPhidget {
     }
 
     pub fn set_font_size(&self, font: PhidgetLCD_Font, width: i32, height: i32) -> Result<(), u32> {
-        let rc;
-        unsafe {
-            rc = PhidgetLCD_setFontSize(self.handle, font, width, height);
-        }
+        let rc = unsafe {
+            PhidgetLCD_setFontSize(self.handle, font, width, height)
+        };
         match rc {
             0 => Ok(()),
             _ => Err(rc),
@@ -107,10 +100,9 @@ impl LCDPhidget {
         text: &str,
     ) -> Result<(), u32> {
         let (_, char_pointer) = str_to_char_arr(text);
-        let rc;
-        unsafe {
-            rc = PhidgetLCD_writeText(self.handle, font, x_position, y_position, char_pointer)
-        }
+        let rc = unsafe {
+            PhidgetLCD_writeText(self.handle, font, x_position, y_position, char_pointer)
+        };
         match rc {
             0 => Ok(()),
             _ => Err(rc),
