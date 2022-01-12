@@ -24,12 +24,11 @@ impl TemperaturePhidget {
     }
 
     pub fn create() -> Result<TemperaturePhidget, u32> {
-        let rc;
         let mut temperature_handle;
-        unsafe {
+        let rc = unsafe {
             temperature_handle = MaybeUninit::uninit().assume_init();
-            rc = PhidgetTemperatureSensor_create(&mut temperature_handle);
-        }
+            PhidgetTemperatureSensor_create(&mut temperature_handle)
+        };
         match rc {
             0 => Ok(TemperaturePhidget {
                 handle: temperature_handle,
@@ -39,12 +38,11 @@ impl TemperaturePhidget {
     }
 
     pub fn get_temperature(&self) -> Result<f64, u32> {
-        let rc;
         let mut temperature;
-        unsafe {
+        let rc = unsafe {
             temperature = MaybeUninit::uninit().assume_init();
-            rc = phidget22::PhidgetTemperatureSensor_getTemperature(self.handle, &mut temperature);
-        }
+            phidget22::PhidgetTemperatureSensor_getTemperature(self.handle, &mut temperature)
+        };
         match rc {
             0 => Ok(temperature),
             _ => Err(rc),

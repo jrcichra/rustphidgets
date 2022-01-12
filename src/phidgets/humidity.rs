@@ -32,12 +32,11 @@ impl HumidityPhidget {
     }
 
     pub fn get_humidity(&self) -> Result<f64, u32> {
-        let rc;
         let mut humidity;
-        unsafe {
+        let rc = unsafe {
             humidity = MaybeUninit::uninit().assume_init();
-            rc = phidget22::PhidgetHumiditySensor_getHumidity(self.handle, &mut humidity);
-        }
+            phidget22::PhidgetHumiditySensor_getHumidity(self.handle, &mut humidity)
+        };
         match rc {
             0 => Ok(humidity),
             _ => Err(rc),
