@@ -1,38 +1,51 @@
-use super::super::phidgets;
 use super::phidget22;
+use super::phidget22::*;
+use crate::phidgets::PhidgetTraits;
+
 use core::mem::MaybeUninit;
-
-#[derive(Copy, Clone)]
-pub struct PhidgetTemperature {
+pub struct TemperaturePhidget {
     handle: phidget22::PhidgetTemperatureSensorHandle,
-    pub phidget: phidgets::Phidget,
 }
 
-pub trait PhidgetTemperatureTraits {
-    fn new() -> PhidgetTemperature;
-    fn get_temperature(self) -> f64;
-}
-
-impl PhidgetTemperatureTraits for PhidgetTemperature {
-    fn new() -> PhidgetTemperature {
-        let mut temphandle: phidget22::PhidgetTemperatureSensorHandle;
-        unsafe {
-            temphandle = MaybeUninit::uninit().assume_init();
-            phidget22::PhidgetTemperatureSensor_create(&mut temphandle);
-        }
-        return PhidgetTemperature {
-            handle: temphandle,
-            phidget: phidgets::Phidget {
-                handle: temphandle as phidget22::PhidgetHandle,
-            },
-        };
+impl TemperaturePhidget {
+    pub fn setup(
+        hub_port: i32,
+        // serial: i32,
+        remote: bool,
+        max_wait_millis: u32,
+    ) -> Result<TemperaturePhidget, u32> {
+        let phidget = TemperaturePhidget::create()?;
+        let phidget_handle = phidget.handle as PhidgetHandle;
+        phidget_handle.set_hub_port(hub_port)?;
+        phidget_handle.set_is_remote(remote)?;
+        // phidget_handle.set_device_serial_number(serial)?;
+        phidget_handle.open_wait_for_attachment(max_wait_millis)?;
+        Ok(phidget)
     }
-    fn get_temperature(self) -> f64 {
-        let mut temp = 0.0_f64;
-        let temp_ptr: *mut f64 = &mut temp;
-        unsafe {
-            phidget22::PhidgetTemperatureSensor_getTemperature(self.handle, temp_ptr);
+
+    pub fn create() -> Result<TemperaturePhidget, u32> {
+        let mut temperature_handle;
+        let rc = unsafe {
+            temperature_handle = MaybeUninit::uninit().assume_init();
+            PhidgetTemperatureSensor_create(&mut temperature_handle)
+        };
+        match rc {
+            0 => Ok(TemperaturePhidget {
+                handle: temperature_handle,
+            }),
+            _ => Err(rc),
         }
-        return temp;
+    }
+
+    pub fn get_temperature(&self) -> Result<f64, u32> {
+        let mut temperature;
+        let rc = unsafe {
+            temperature = MaybeUninit::uninit().assume_init();
+            phidget22::PhidgetTemperatureSensor_getTemperature(self.handle, &mut temperature)
+        };
+        match rc {
+            0 => Ok(temperature),
+            _ => Err(rc),
+        }
     }
 }
