@@ -37,6 +37,10 @@ impl TemperaturePhidget {
         }
     }
 
+    pub fn close(&self) -> Result<(), u32> {
+        self.base_handle.close()
+    }
+
     pub fn get_temperature(&self) -> Result<f64, u32> {
         let mut temperature;
         let rc = unsafe {

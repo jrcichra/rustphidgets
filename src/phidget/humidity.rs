@@ -28,6 +28,10 @@ impl HumidityPhidget {
         }
     }
 
+    pub fn close(&self) -> Result<(), u32> {
+        self.base_handle.close()
+    }
+
     pub fn get_humidity(&self) -> Result<f64, u32> {
         let mut humidity;
         let rc = unsafe {
