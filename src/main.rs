@@ -7,13 +7,12 @@
 
 extern crate libc;
 
-mod phidgets;
-
 use clap::Parser;
-use phidgets::{
-    celcius_to_fahrenheit, HumidityPhidget, LCDPhidget, PhidgetLCD_Font_FONT_6x12, PhidgetNetwork,
-    TemperaturePhidget,
-};
+use rustphidgets::phidget::helpers::celcius_to_fahrenheit;
+use rustphidgets::phidget::lcd::LCDPhidget;
+use rustphidgets::phidget::network::PhidgetNetwork;
+use rustphidgets::phidget::phidget22::PhidgetLCD_Font_FONT_6x12;
+use rustphidgets::phidget::temperature::TemperaturePhidget;
 use std::thread::sleep;
 use std::time::Duration;
 
@@ -62,8 +61,7 @@ fn lcd() -> Result<(), u32> {
     let mut phidget = LCDPhidget::setup(1, true, 5000)?;
     println!("It was successful!");
 
-    phidget.set_backlight(0.05)?;
-    phidget.write_text(PhidgetLCD_Font_FONT_6x12, 20, 20, "BOB")?;
+    phidget.set_backlight(0.05)?.write_text(PhidgetLCD_Font_FONT_6x12, 20, 20, "Test")?;
     phidget.flush()?;
 
     let mut x = String::new();
