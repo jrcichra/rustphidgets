@@ -1,10 +1,10 @@
-use super::phidget22;
-use super::phidget22::*;
-use crate::phidgets::PhidgetTraits;
-
 use core::mem::MaybeUninit;
+
+use super::{phidget22::{PhidgetHandle, PhidgetTemperatureSensorHandle, PhidgetTemperatureSensor_create, PhidgetTemperatureSensor_getTemperature}, Phidget};
+
 pub struct TemperaturePhidget {
-    handle: phidget22::PhidgetTemperatureSensorHandle,
+    handle: PhidgetTemperatureSensorHandle,
+    base_handle: PhidgetHandle
 }
 
 impl TemperaturePhidget {
@@ -15,11 +15,10 @@ impl TemperaturePhidget {
         max_wait_millis: u32,
     ) -> Result<TemperaturePhidget, u32> {
         let phidget = TemperaturePhidget::create()?;
-        let phidget_handle = phidget.handle as PhidgetHandle;
-        phidget_handle.set_hub_port(hub_port)?;
-        phidget_handle.set_is_remote(remote)?;
+        phidget.base_handle.set_hub_port(hub_port)?;
+        phidget.base_handle.set_is_remote(remote)?;
         // phidget_handle.set_device_serial_number(serial)?;
-        phidget_handle.open_wait_for_attachment(max_wait_millis)?;
+        phidget.base_handle.open_wait_for_attachment(max_wait_millis)?;
         Ok(phidget)
     }
 
@@ -32,6 +31,7 @@ impl TemperaturePhidget {
         match rc {
             0 => Ok(TemperaturePhidget {
                 handle: temperature_handle,
+                base_handle: temperature_handle as PhidgetHandle
             }),
             _ => Err(rc),
         }
@@ -41,7 +41,7 @@ impl TemperaturePhidget {
         let mut temperature;
         let rc = unsafe {
             temperature = MaybeUninit::uninit().assume_init();
-            phidget22::PhidgetTemperatureSensor_getTemperature(self.handle, &mut temperature)
+            PhidgetTemperatureSensor_getTemperature(self.handle, &mut temperature)
         };
         match rc {
             0 => Ok(temperature),
