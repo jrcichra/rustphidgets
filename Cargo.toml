@@ -3,6 +3,10 @@ name = "rustphidgets"
 version = "0.1.0"
 links="phidget22"
 build = "build.rs"
+homepage = "https://github.com/jrcichra/rustphidgets"
+repository = "https://github.com/jrcichra/rustphidgets"
+readme = "README.md"
+license = "MIT"
 authors = ["Justin Cichra <1342149+jrcichra@users.noreply.github.com>"]
 edition = "2021"
 
