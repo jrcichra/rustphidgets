@@ -1,30 +1,41 @@
-use super::phidget22::{PhidgetHumiditySensorHandle, PhidgetHandle, PhidgetHumiditySensor_create, PhidgetHumiditySensor_getHumidity};
-use core::mem::MaybeUninit;
+use super::phidget22::{
+    PhidgetHandle, PhidgetHumiditySensorHandle, PhidgetHumiditySensor_create,
+    PhidgetHumiditySensor_delete, PhidgetHumiditySensor_getHumidity,
+};
 use crate::phidget::Phidget;
+use core::mem::MaybeUninit;
 
 pub struct HumidityPhidget {
     handle: PhidgetHumiditySensorHandle,
-    base_handle: PhidgetHandle
+    base_handle: PhidgetHandle,
 }
 
 impl HumidityPhidget {
-    pub fn setup(hub_port: i32, remote: bool, max_wait_millis: u32) -> Result<HumidityPhidget, u32> {
+    pub fn setup(
+        hub_port: i32,
+        remote: bool,
+        max_wait_millis: u32,
+    ) -> Result<HumidityPhidget, u32> {
         let phidget = HumidityPhidget::create()?;
         phidget.base_handle.set_hub_port(hub_port)?;
         phidget.base_handle.set_is_remote(remote)?;
-        phidget.base_handle.open_wait_for_attachment(max_wait_millis)?;
+        phidget
+            .base_handle
+            .open_wait_for_attachment(max_wait_millis)?;
         Ok(phidget)
     }
 
     pub fn create() -> Result<HumidityPhidget, u32> {
-        let mut humidity_handle;
-        let rc = unsafe {
-            humidity_handle = MaybeUninit::uninit().assume_init();
-            PhidgetHumiditySensor_create(&mut humidity_handle)
-        };
+        let mut humidity_handle = MaybeUninit::uninit();
+        let rc = unsafe { PhidgetHumiditySensor_create(humidity_handle.as_mut_ptr()) };
         match rc {
-            0 => Ok(HumidityPhidget { handle: humidity_handle, base_handle: humidity_handle as PhidgetHandle }),
-            x => Err(x)
+            0 => unsafe {
+                Ok(HumidityPhidget {
+                    handle: humidity_handle.assume_init(),
+                    base_handle: humidity_handle.assume_init() as PhidgetHandle,
+                })
+            },
+            x => Err(x),
         }
     }
 
@@ -33,14 +44,19 @@ impl HumidityPhidget {
     }
 
     pub fn get_humidity(&self) -> Result<f64, u32> {
-        let mut humidity;
-        let rc = unsafe {
-            humidity = MaybeUninit::uninit().assume_init();
-            PhidgetHumiditySensor_getHumidity(self.handle, &mut humidity)
-        };
+        let mut humidity = MaybeUninit::uninit();
+        let rc = unsafe { PhidgetHumiditySensor_getHumidity(self.handle, humidity.as_mut_ptr()) };
         match rc {
-            0 => Ok(humidity),
+            0 => Ok(unsafe { humidity.assume_init() }),
             _ => Err(rc),
+        }
+    }
+}
+
+impl Drop for HumidityPhidget {
+    fn drop(&mut self) {
+        unsafe {
+            PhidgetHumiditySensor_delete(&mut self.handle);
         }
     }
 }

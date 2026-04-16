@@ -1,13 +1,17 @@
+pub mod helpers;
 pub mod humidity;
-pub mod temperature;
 pub mod lcd;
 pub mod network;
 pub mod phidget22;
-pub mod helpers;
+pub mod temperature;
 
-use crate::phidget::phidget22::{PhidgetHandle, Phidget_setIsRemote, Phidget_setDeviceSerialNumber, Phidget_setHubPort, Phidget_setChannel, Phidget_openWaitForAttachment, Phidget_close};
+use crate::phidget::phidget22::{
+    PhidgetHandle, Phidget_close, Phidget_openWaitForAttachment, Phidget_setChannel,
+    Phidget_setDeviceSerialNumber, Phidget_setHubPort, Phidget_setIsRemote,
+};
 
 // functions common to all phidget
+#[allow(dead_code)]
 trait Phidget {
     fn set_is_remote(self, remote: bool) -> Result<(), u32>;
     fn set_device_serial_number(self, serial: i32) -> Result<(), u32>;
@@ -64,9 +68,7 @@ impl Phidget for PhidgetHandle {
     }
 
     fn close(self) -> Result<(), u32> {
-        let rc = unsafe {
-            Phidget_close(self)
-        };
+        let rc = unsafe { Phidget_close(self) };
         match rc {
             0 => Ok(()),
             _ => Err(rc),

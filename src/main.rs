@@ -57,11 +57,14 @@ fn temp() -> Result<(), u32> {
     }
 }
 
+#[allow(dead_code)]
 fn lcd() -> Result<(), u32> {
     let mut phidget = LCDPhidget::setup(1, true, 5000)?;
     println!("It was successful!");
 
-    phidget.set_backlight(0.05)?.write_text(PhidgetLCD_Font_FONT_6x12, 20, 20, "Test")?;
+    phidget
+        .set_backlight(0.05)?
+        .write_text(PhidgetLCD_Font_FONT_6x12, 20, 20, "Test")?;
     phidget.flush()?;
 
     let mut x = String::new();
